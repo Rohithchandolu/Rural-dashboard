@@ -16,8 +16,8 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="outline" size="sm">
-        <Sun className="h-4 w-4" />
+      <Button variant="outline" size="sm" disabled>
+        <div className="h-4 w-4" />
       </Button>
     )
   }
