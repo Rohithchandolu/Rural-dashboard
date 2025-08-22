@@ -33,7 +33,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSans.variable} antialiased`}>
       <body className={sourceSans.className}>
-        <div id="__next"></div>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster />
