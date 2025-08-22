@@ -17,7 +17,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <Button variant="outline" size="sm" onClick={() => {}}>
-        <Sun className="h-4 w-4" />
+        <span className="h-4 w-4" />
       </Button>
     )
   }
