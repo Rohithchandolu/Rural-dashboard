@@ -27,16 +27,23 @@ export function CsvReportWidget() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
-    if (selectedFile && (selectedFile.type === "text/csv" || selectedFile.name.endsWith(".csv"))) {
+    const fileName = selectedFile?.name.toLowerCase() ?? ""
+
+    // Browsers may report CSV files as text/plain, application/vnd.ms-excel, or an empty MIME type.
+    // The extension is the reliable signal for this upload because the API validates the contents too.
+    if (selectedFile && fileName.endsWith(".csv")) {
       setFile(selectedFile)
       setReportData(null)
-    } else {
-      toast({
-        title: "Invalid file type",
-        description: "Please select a CSV file.",
-        variant: "destructive",
-      })
+      return
     }
+
+    e.target.value = ""
+    setFile(null)
+    toast({
+      title: "Invalid file type",
+      description: "Please select a file with a .csv extension.",
+      variant: "destructive",
+    })
   }
 
   const generateReport = async () => {
