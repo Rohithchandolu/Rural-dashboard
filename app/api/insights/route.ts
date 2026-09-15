@@ -1,103 +1,61 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { generateText } from "ai"
+import { google } from "@ai-sdk/google"
 import { TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from "lucide-react"
 
-// Mock Gemini API response for demonstration
-// In production, replace with actual Gemini API call
-async function generateInsightWithGemini(topic: string) {
-  // This would be replaced with actual Gemini API call
-  // const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     contents: [{
-  //       parts: [{
-  //         text: `Generate an agricultural insight about ${topic} based on crop production and weather data...`
-  //       }]
-  //     }]
-  //   })
-  // })
+const fallbackInsights = {
+  "crop-yield": { title: "Wheat Yield Optimization Through Precision Timing", content: "Wheat sown during the optimal seasonal window can improve germination and reduce frost exposure during grain filling.", category: "Yield Optimization", impact: "high" as const, confidence: 82 },
+  "weather-impact": { title: "Weather Variability Is Increasing Planting Risk", content: "Monitoring rainfall timing and temperature extremes helps farmers adjust planting dates and protect kharif crop yields.", category: "Weather Analysis", impact: "high" as const, confidence: 80 },
+  "regional-comparison": { title: "Regional Conditions Drive Production Efficiency", content: "Differences in water availability, temperature, and soil conditions explain much of the variation in regional crop productivity.", category: "Regional Analysis", impact: "medium" as const, confidence: 78 },
+  "seasonal-trends": { title: "Harvest Timing Is Shifting Across Regions", content: "Recent seasonal changes make timely weather monitoring increasingly important for harvest planning and crop protection.", category: "Climate Trends", impact: "medium" as const, confidence: 79 },
+  "climate-adaptation": { title: "Resilient Varieties Reduce Water-Stress Risk", content: "Drought-tolerant varieties can protect yields during water stress when paired with appropriate soil and irrigation management.", category: "Adaptation Strategy", impact: "high" as const, confidence: 81 },
+} as const
 
-  // Mock responses for different topics
-  const mockInsights = {
-    "crop-yield": {
-      title: "Wheat Yield Optimization Through Precision Timing",
-      content:
-        "Analysis of 5-year data reveals that wheat sowing between October 15-30 results in 18% higher yields compared to early or late sowing. This optimal window aligns with temperature patterns that favor germination while avoiding frost damage during grain filling stages.",
-      category: "Yield Optimization",
-      impact: "high" as const,
-      confidence: 91,
-      icon: TrendingUp,
-    },
-    "weather-impact": {
-      title: "Monsoon Delay Impact on Kharif Crops",
-      content:
-        "A 2-week delay in monsoon onset reduces kharif crop yields by an average of 8-12%. Rice is most affected with 15% yield reduction, while cotton shows better resilience with only 6% impact. Early warning systems can help farmers adapt planting schedules.",
-      category: "Weather Analysis",
-      impact: "high" as const,
-      confidence: 88,
-      icon: AlertTriangle,
-    },
-    "regional-comparison": {
-      title: "Northern vs Southern Rice Production Efficiency",
-      content:
-        "Northern states achieve 15% higher rice productivity per unit water compared to southern regions, primarily due to cooler temperatures reducing evapotranspiration. However, southern states show better pest resistance and longer growing seasons.",
-      category: "Regional Analysis",
-      impact: "medium" as const,
-      confidence: 85,
-      icon: BarChart3,
-    },
-    "seasonal-trends": {
-      title: "Shifting Harvest Patterns Due to Climate Change",
-      content:
-        "Harvest seasons have shifted 7-10 days earlier over the past decade across most crops. This trend is most pronounced in wheat (12 days earlier) and least in rice (5 days earlier), indicating varying climate sensitivity among crops.",
-      category: "Climate Trends",
-      impact: "medium" as const,
-      confidence: 93,
-      icon: TrendingUp,
-    },
-    "climate-adaptation": {
-      title: "Drought-Resistant Crop Varieties Performance",
-      content:
-        "New drought-resistant varieties show 25% better performance in water-stressed conditions while maintaining 95% of normal yields in optimal conditions. Adoption rates are highest in Maharashtra (45%) and lowest in Punjab (12%).",
-      category: "Adaptation Strategy",
-      impact: "high" as const,
-      confidence: 89,
-      icon: Lightbulb,
-    },
-  }
+type Topic = keyof typeof fallbackInsights
 
-  const insight = mockInsights[topic as keyof typeof mockInsights] || mockInsights["crop-yield"]
+async function generateInsight(topic: Topic) {
+  const fallback = fallbackInsights[topic]
+  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY
+  if (!apiKey) return fallback
 
+  const { text } = await generateText({
+    model: google("gemini-2.0-flash"),
+    temperature: 0.2,
+    prompt: `Create one evidence-aware agricultural insight for the topic "${topic}". Return only valid JSON with title, content, category, impact (high, medium, or low), and confidence (0-100). Do not invent a specific dataset or cite unsupported statistics.`,
+  })
+
+  const parsed = JSON.parse(text.replace(/^```json\s*|\s*```$/g, "").trim())
+  const impact = ["high", "medium", "low"].includes(parsed.impact) ? parsed.impact : fallback.impact
   return {
-    id: Date.now(),
-    ...insight,
+    title: String(parsed.title || fallback.title),
+    content: String(parsed.content || fallback.content),
+    category: String(parsed.category || fallback.category),
+    impact,
+    confidence: Math.max(0, Math.min(100, Number(parsed.confidence) || fallback.confidence)),
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic } = await request.json()
-
-    if (!topic) {
-      return NextResponse.json({ error: "Topic is required" }, { status: 400 })
+    const body = await request.json()
+    const topic = body?.topic as Topic
+    if (!topic || !(topic in fallbackInsights)) {
+      return NextResponse.json({ error: "A valid topic is required" }, { status: 400 })
     }
 
-    // Check for API key (in production)
-    // if (!process.env.GEMINI_API_KEY) {
-    //   return NextResponse.json(
-    //     { error: "Gemini API key not configured" },
-    //     { status: 500 }
-    //   )
-    // }
+    const fallback = fallbackInsights[topic]
+    let insight
+    try {
+      insight = await generateInsight(topic)
+    } catch (error) {
+      console.error("[v0] Insight generation failed; using fallback:", error)
+      insight = fallback
+    }
 
-    const insight = await generateInsightWithGemini(topic)
-
-    return NextResponse.json({ insight })
+    const icons = { high: AlertTriangle, medium: BarChart3, low: Lightbulb }
+    return NextResponse.json({ insight: { id: Date.now(), ...insight, icon: icons[insight.impact] || TrendingUp } })
   } catch (error) {
-    console.error("Error generating insight:", error)
+    console.error("[v0] Error generating insight:", error)
     return NextResponse.json({ error: "Failed to generate insight" }, { status: 500 })
   }
 }

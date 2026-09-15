@@ -81,9 +81,9 @@ export function CsvReportWidget() {
 
   const openDashboardReport = () => {
     if (reportData) {
-      // Store report data in sessionStorage for the new tab
+      // Keep the report in this tab so sessionStorage is available on the report page.
       sessionStorage.setItem(`report-${reportData.reportId}`, JSON.stringify(reportData))
-      window.open(`/report/${reportData.reportId}`, "_blank")
+      window.location.assign(`/report/${reportData.reportId}`)
     }
   }
 
