@@ -1,7 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import type { LucideIcon } from "lucide-react"
+import { AlertTriangle, BarChart3, Lightbulb, TrendingUp } from "lucide-react"
+
+const insightIcons = {
+  "alert-triangle": AlertTriangle,
+  "bar-chart-3": BarChart3,
+  lightbulb: Lightbulb,
+  "trending-up": TrendingUp,
+} as const
 
 interface InsightCardProps {
   insight: {
@@ -11,12 +18,13 @@ interface InsightCardProps {
     category: string
     impact: "high" | "medium" | "low"
     confidence: number
-    icon: LucideIcon
+    icon: keyof typeof insightIcons
   }
 }
 
 export function InsightCard({ insight }: InsightCardProps) {
-  const { title, content, category, impact, confidence, icon: Icon } = insight
+  const { title, content, category, impact, confidence, icon } = insight
+  const Icon = insightIcons[icon] ?? TrendingUp
 
   const impactColors = {
     high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",

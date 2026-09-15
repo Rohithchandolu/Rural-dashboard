@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { google } from "@ai-sdk/google"
-import { TrendingUp, AlertTriangle, Lightbulb, BarChart3 } from "lucide-react"
 
 const fallbackInsights = {
   "crop-yield": { title: "Wheat Yield Optimization Through Precision Timing", content: "Wheat sown during the optimal seasonal window can improve germination and reduce frost exposure during grain filling.", category: "Yield Optimization", impact: "high" as const, confidence: 82 },
@@ -52,8 +51,13 @@ export async function POST(request: NextRequest) {
       insight = fallback
     }
 
-    const icons = { high: AlertTriangle, medium: BarChart3, low: Lightbulb }
-    return NextResponse.json({ insight: { id: Date.now(), ...insight, icon: icons[insight.impact] || TrendingUp } })
+    return NextResponse.json({
+      insight: {
+        id: Date.now(),
+        ...insight,
+        icon: insight.impact === "high" ? "alert-triangle" : insight.impact === "medium" ? "bar-chart-3" : "lightbulb",
+      },
+    })
   } catch (error) {
     console.error("[v0] Error generating insight:", error)
     return NextResponse.json({ error: "Failed to generate insight" }, { status: 500 })
