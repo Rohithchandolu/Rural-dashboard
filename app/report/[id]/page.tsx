@@ -82,7 +82,7 @@ Generated at: ${new Date().toISOString()}
     const chartConfig = {
       value: {
         label: "Value",
-        color: "hsl(var(--chart-1))",
+        color: "var(--chart-1)",
       },
     }
 
@@ -107,7 +107,14 @@ Generated at: ${new Date().toISOString()}
               <XAxis dataKey="name" />
               <YAxis />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Line type="monotone" dataKey="value" stroke="var(--color-value)" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="var(--color-value)"
+                strokeWidth={2}
+                dot={{ r: 4, fill: "var(--color-value)", stroke: "var(--color-value)", strokeWidth: 1 }}
+                activeDot={{ r: 6, fill: "var(--color-value)", stroke: "var(--background)", strokeWidth: 2 }}
+              />
             </LineChart>
           </ChartContainer>
         )

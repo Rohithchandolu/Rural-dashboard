@@ -1,0 +1,13 @@
+farm_id,region,crop,season,area_hectares,yield_tons,rainfall_mm,soil_ph,irrigation,water_usage_liters,pest_incidents,revenue_usd
+F-001,North Valley,Wheat,Spring,12.5,38.4,412,6.7,Drip,184000,1,12960
+F-002,North Valley,Corn,Summer,18.0,72.6,528,6.4,Sprinkler,312000,3,25410
+F-003,East Plains,Rice,Monsoon,9.2,41.8,886,6.1,Flood,498000,2,16720
+F-004,East Plains,Soybean,Summer,15.7,36.2,604,6.8,Drip,226000,0,19840
+F-005,South Ridge,Cotton,Autumn,22.4,31.5,338,7.2,Sprinkler,405000,5,28650
+F-006,South Ridge,Tomato,Spring,4.8,29.7,276,6.5,Drip,92000,2,22400
+F-007,West Basin,Potato,Winter,8.6,44.1,198,5.9,Drip,156000,1,17320
+F-008,West Basin,Barley,Winter,14.3,40.8,244,6.6,None,0,0,14280
+F-009,Central Hills,Maize,Autumn,11.1,45.9,371,6.3,Sprinkler,201000,4,16065
+F-010,Central Hills,Chickpea,Spring,7.5,12.8,219,7.0,None,0,1,9340
+F-011,North Valley,Apple,Autumn,6.2,18.6,487,6.9,Drip,118000,2,23100
+F-012,South Ridge,Groundnut,Monsoon,13.8,24.3,742,6.2,Sprinkler,287000,3,15420
